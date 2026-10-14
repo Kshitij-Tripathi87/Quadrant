@@ -3,140 +3,420 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Express Analytics | RAG Technical Documentation Assistant</title>
-  <meta name="description" content="Self-corrective LangGraph RAG assistant for technical documentation, featuring query expansion, document grading, citations, and hallucination checks.">
+  <title>DocuGraph AI | Self-Corrective Technical Documentation Assistant</title>
+  <meta name="description" content="Enterprise Self-Corrective RAG Documentation Assistant powered by LangGraph, ChromaDB, FastEmbed, and Google Gemini.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
 
-  <!-- App Header -->
+  <!-- Top Application Navigation Header -->
   <header class="app-header">
     <div class="header-container">
+      
+      <!-- Brand & Title -->
       <div class="brand">
-        <div class="brand-icon">⚡</div>
-        <div class="brand-info">
-          <h1>Express Analytics <span class="badge-tag">Self-Corrective LangGraph</span></h1>
+        <div class="brand-logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title-row">
+            <span class="brand-name">DocuGraph <span class="gradient-text">AI</span></span>
+            <span class="version-tag">v2.0</span>
+          </div>
+          <span class="brand-subtitle">Self-Corrective LangGraph RAG</span>
         </div>
       </div>
 
       <!-- Navigation Tabs -->
-      <nav class="nav-tabs" role="tablist">
-        <button id="tab-chat-btn" class="tab-btn active" onclick="switchTab('chat')">Assistant Q&A</button>
-        <button id="tab-corpus-btn" class="tab-btn" onclick="switchTab('corpus')">Corpus Explorer</button>
-        <button id="tab-ingest-btn" class="tab-btn" onclick="switchTab('ingest')">Ingest Documents</button>
+      <nav class="nav-tabs" role="tablist" aria-label="Main Navigation">
+        <button id="tab-chat-btn" class="tab-btn active" role="tab" aria-selected="true" onclick="switchTab('chat')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          Assistant Q&A
+        </button>
+        <button id="tab-corpus-btn" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('corpus')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          Corpus Explorer
+        </button>
+        <button id="tab-ingest-btn" class="tab-btn" role="tab" aria-selected="false" onclick="switchTab('ingest')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Ingest Knowledge
+        </button>
       </nav>
 
-      <!-- System Health Indicator -->
-      <div class="system-status">
-        <span class="status-indicator" id="health-dot"></span>
-        <span id="health-text">Online</span>
-        <span class="badge-tag" id="vectors-badge">0 Chunks</span>
+      <!-- System Telemetry & Quick Links -->
+      <div class="header-right">
+        <div class="telemetry-pill" id="telemetry-pill" title="Live System Health">
+          <span class="live-dot" id="health-dot"></span>
+          <span class="model-badge" id="model-badge">Gemini 3.5 Flash Lite</span>
+          <span class="separator">•</span>
+          <span class="chunks-badge" id="vectors-badge">27 Chunks</span>
+        </div>
+
+        <a href="/docs" target="_blank" class="icon-link-btn" title="Open Swagger API Documentation">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span>Swagger API</span>
+        </a>
       </div>
+
     </div>
   </header>
 
-  <!-- Main Content Wrapper -->
-  <main class="main-wrapper">
+  <!-- Main View Container -->
+  <main class="main-container">
 
-    <!-- Tab 1: Chat Assistant -->
-    <section id="tab-chat" class="tab-pane active" aria-labelledby="tab-chat-btn">
-      <div class="chat-container">
-        <div class="chat-messages" id="chat-messages">
-          <div class="empty-chat" id="empty-state">
-            <div style="font-size: 2.8rem;">📚</div>
-            <h2>Technical Documentation Assistant</h2>
-            <p>Ask in-depth questions about FastAPI, LangGraph, Pydantic, or uploaded documentation.</p>
-            
-            <div class="suggestion-grid">
-              <button class="chip-btn" onclick="sendSuggestion('How do I use yield in FastAPI dependencies for resource cleanup?')">
-                💡 How do I use yield in FastAPI dependencies?
-              </button>
-              <button class="chip-btn" onclick="sendSuggestion('What is LangGraph StateGraph and how do conditional edges work?')">
-                🔄 Explain LangGraph StateGraph conditional edges
-              </button>
-              <button class="chip-btn" onclick="sendSuggestion('How does Pydantic v2 use @field_validator to customize validation?')">
-                🛡️ Pydantic v2 @field_validator examples
-              </button>
-              <button class="chip-btn" onclick="sendSuggestion('Explain REST API idempotency and HTTP status codes.')">
-                🌐 REST API HTTP methods & idempotency
+    <!-- ========================================== -->
+    <!-- TAB 1: ASSISTANT Q&A (CHAT INTERFACE)     -->
+    <!-- ========================================== -->
+    <section id="tab-chat" class="tab-pane active" role="tabpanel" aria-labelledby="tab-chat-btn">
+      
+      <!-- Chat Workspace Layout: Left Sidebar + Center Messages -->
+      <div class="chat-workspace">
+        
+        <!-- Left Sidebar: Session Threads & Architecture Telemetry -->
+        <aside class="chat-sidebar" id="chat-sidebar">
+          
+          <div class="sidebar-header">
+            <button class="new-chat-btn" onclick="startNewChat()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              New Conversation
+            </button>
+          </div>
+
+          <!-- Session Threads List -->
+          <div class="sidebar-section">
+            <div class="sidebar-label">
+              <span>Recent Conversations</span>
+              <button class="icon-action-btn" onclick="loadRecentSessions()" title="Refresh Sessions">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
               </button>
             </div>
+            <div class="sessions-list" id="sessions-list">
+              <!-- Dynamically populated -->
+            </div>
           </div>
+
+          <!-- Architecture & Engine Telemetry Card -->
+          <div class="sidebar-footer">
+            <div class="engine-card">
+              <div class="engine-title">
+                <span class="engine-spark">⚡</span>
+                <span>Graph Engine Topology</span>
+              </div>
+              <ul class="engine-specs">
+                <li><span>State Machine:</span> <strong>LangGraph (7 Nodes)</strong></li>
+                <li><span>Vector DB:</span> <strong>ChromaDB Local</strong></li>
+                <li><span>Embeddings:</span> <strong>FastEmbed ONNX</strong></li>
+                <li><span>Self-Correction:</span> <strong>Self-RAG Grounding</strong></li>
+              </ul>
+            </div>
+          </div>
+
+        </aside>
+
+        <!-- Center: Chat Conversation Pane -->
+        <div class="chat-main">
+          
+          <!-- Message Stream Container -->
+          <div class="chat-messages" id="chat-messages">
+            
+            <!-- Default Welcome Hero State -->
+            <div class="empty-state" id="empty-state">
+              <div class="hero-halo">
+                <div class="hero-icon-box">
+                  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="url(#hero-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <defs>
+                      <linearGradient id="hero-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#818cf8"/>
+                        <stop offset="50%" stop-color="#c084fc"/>
+                        <stop offset="100%" stop-color="#38bdf8"/>
+                      </linearGradient>
+                    </defs>
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                  </svg>
+                </div>
+              </div>
+
+              <h1 class="hero-title">Technical Documentation Assistant</h1>
+              <p class="hero-desc">
+                High-precision, hallucination-resistant engineering knowledge base. Powered by self-corrective query expansion, document grading, and granular section citations.
+              </p>
+
+              <!-- Capability Badges -->
+              <div class="feature-badges">
+                <span class="feature-pill">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  Self-RAG Grounded
+                </span>
+                <span class="feature-pill">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                  Query Reformulation
+                </span>
+                <span class="feature-pill">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Granular Markdown Citations
+                </span>
+              </div>
+
+              <!-- Suggested Inquiries -->
+              <div class="suggestions-container">
+                <div class="suggestions-label">Try asking about:</div>
+                <div class="suggestions-grid">
+                  <button class="chip-card" onclick="sendSuggestion('How do I use yield in FastAPI dependencies for resource cleanup and rollback?')">
+                    <div class="chip-icon">⚡</div>
+                    <div class="chip-text">
+                      <span class="chip-headline">FastAPI Yield Dependencies</span>
+                      <span class="chip-sub">Resource teardown & context managers</span>
+                    </div>
+                  </button>
+
+                  <button class="chip-card" onclick="sendSuggestion('What is LangGraph StateGraph and how do conditional edges control workflow routing?')">
+                    <div class="chip-icon">🔄</div>
+                    <div class="chip-text">
+                      <span class="chip-headline">LangGraph Conditional Edges</span>
+                      <span class="chip-sub">StateGraph routing & bounded retry cycles</span>
+                    </div>
+                  </button>
+
+                  <button class="chip-card" onclick="sendSuggestion('How does Pydantic v2 use @field_validator to validate fields with mode=\'before\' or \'after\'?')">
+                    <div class="chip-icon">🛡️</div>
+                    <div class="chip-text">
+                      <span class="chip-headline">Pydantic v2 @field_validator</span>
+                      <span class="chip-sub">Schema validation & data transformation</span>
+                    </div>
+                  </button>
+
+                  <button class="chip-card" onclick="sendSuggestion('Explain REST API idempotency, safe methods, and appropriate HTTP status codes.')">
+                    <div class="chip-icon">🌐</div>
+                    <div class="chip-text">
+                      <span class="chip-headline">REST API Idempotency Rules</span>
+                      <span class="chip-sub">PUT vs POST semantics & status codes</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Bottom Chat Input Bar -->
+          <div class="chat-input-wrapper">
+            <div class="chat-input-card">
+              <div class="input-prefix-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </div>
+              <textarea 
+                id="user-input" 
+                class="chat-textarea" 
+                rows="1"
+                placeholder="Ask technical question across FastAPI, LangGraph, Pydantic, or indexed docs..."
+                aria-label="Ask technical question"
+              ></textarea>
+              <button id="send-button" class="send-action-btn" onclick="handleSend()" title="Send query (Enter)">
+                <span class="btn-text">Submit</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </div>
+            
+            <div class="input-hint-row">
+              <span class="hint-key"><strong>Enter</strong> to send • <strong>Shift + Enter</strong> for newline</span>
+              <span class="hint-model">Grounded with <span id="current-llm-label">Gemini 3.5 Flash Lite</span></span>
+            </div>
+          </div>
+
         </div>
 
-        <!-- Chat Input Bar -->
-        <div class="chat-input-bar">
-          <div class="input-container">
-            <input 
-              type="text" 
-              id="user-input" 
-              class="chat-input" 
-              placeholder="Ask a technical question... (e.g. How does dependency injection work with yield?)"
-              autocomplete="off"
-            />
-          </div>
-          <button id="send-button" class="send-btn" onclick="handleSend()">
-            <span>Ask</span> ➔
-          </button>
-        </div>
       </div>
+
     </section>
 
-    <!-- Tab 2: Corpus Explorer -->
-    <section id="tab-corpus" class="tab-pane" aria-labelledby="tab-corpus-btn">
-      <div class="view-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+    <!-- ========================================== -->
+    <!-- TAB 2: CORPUS EXPLORER                    -->
+    <!-- ========================================== -->
+    <section id="tab-corpus" class="tab-pane" role="tabpanel" aria-labelledby="tab-corpus-btn">
+      <div class="view-panel">
+        
+        <div class="panel-header">
           <div>
-            <h2>Indexed Technical Documentation</h2>
-            <p>Browse documents currently indexed in ChromaDB with their chunk distribution.</p>
+            <h2 class="panel-title">Indexed Documentation Corpus</h2>
+            <p class="panel-desc">Inspect indexed documentation source files, chunk segmentations, and metadata stored in ChromaDB.</p>
           </div>
-          <button class="send-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="loadDocuments()">
-            🔄 Refresh Corpus
-          </button>
+          <div class="panel-actions">
+            <div class="search-box">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="corpus-search" placeholder="Filter documents by name or path..." oninput="filterDocuments()">
+            </div>
+            <button class="secondary-btn" onclick="loadDocuments()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Refresh
+            </button>
+          </div>
         </div>
+
+        <!-- Summary Metric Cards -->
+        <div class="metrics-row">
+          <div class="metric-card">
+            <span class="metric-label">Indexed Documents</span>
+            <span class="metric-value" id="metric-docs-count">0</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Vector Embeddings</span>
+            <span class="metric-value" id="metric-chunks-count">0</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Embedding Dimensions</span>
+            <span class="metric-value">384-d <span class="metric-sub">FastEmbed</span></span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Storage Engine</span>
+            <span class="metric-value">ChromaDB + SQLite</span>
+          </div>
+        </div>
+
+        <!-- Grid of Document Cards -->
         <div class="doc-grid" id="documents-grid">
           <!-- Dynamically populated -->
         </div>
+
       </div>
     </section>
 
-    <!-- Tab 3: Ingest Documents -->
-    <section id="tab-ingest" class="tab-pane" aria-labelledby="tab-ingest-btn">
-      <div class="view-card">
-        <h2>Ingest New Technical Documentation</h2>
-        <p>Expand the knowledge base by uploading Markdown/HTML files or crawling external technical documentation URLs.</p>
-
-        <!-- File Upload Form -->
-        <h3 style="font-size: 1.05rem; margin-bottom: 0.8rem; color: #a5b4fc;">Option 1: Upload Documentation Files</h3>
-        <div class="dropzone" id="file-dropzone" onclick="document.getElementById('file-input').click()">
-          <div style="font-size: 2rem; margin-bottom: 0.5rem;">📄</div>
-          <p style="font-weight: 600; margin-bottom: 0.2rem;">Click to upload or drag & drop files</p>
-          <span style="font-size: 0.8rem; color: var(--text-dim);">Accepts Markdown (.md), Plain Text (.txt), HTML (.html)</span>
-          <input type="file" id="file-input" multiple accept=".md,.markdown,.txt,.html" style="display: none;" onchange="handleFileUpload(event)">
+    <!-- ========================================== -->
+    <!-- TAB 3: DOCUMENT INGESTION                 -->
+    <!-- ========================================== -->
+    <section id="tab-ingest" class="tab-pane" role="tabpanel" aria-labelledby="tab-ingest-btn">
+      <div class="view-panel">
+        
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Ingest Technical Knowledge</h2>
+            <p class="panel-desc">Expand your assistant's corpus by uploading technical documentation files or crawling remote documentation sites.</p>
+          </div>
         </div>
 
-        <!-- URL Ingestion Form -->
-        <h3 style="font-size: 1.05rem; margin: 1.5rem 0 0.8rem; color: #a5b4fc;">Option 2: Crawl Documentation from URL</h3>
-        <div class="url-input-group">
-          <input 
-            type="url" 
-            id="url-input" 
-            class="chat-input" 
-            placeholder="https://docs.pydantic.dev/latest/concepts/models/"
-          />
-          <button class="send-btn" id="ingest-url-btn" onclick="handleUrlIngest()">
-            Fetch & Index
-          </button>
+        <div class="ingest-grid">
+          
+          <!-- Ingestion Card 1: File Upload -->
+          <div class="ingest-card">
+            <div class="card-badge">Method 1</div>
+            <h3 class="card-title">Upload Local Documentation Files</h3>
+            <p class="card-desc">Accepts Markdown files (.md), plain text (.txt), or HTML (.html). Two-tier hierarchical chunker extracts headings and preserves code blocks intact.</p>
+
+            <div class="dropzone" id="file-dropzone" onclick="document.getElementById('file-input').click()">
+              <input type="file" id="file-input" multiple accept=".md,.markdown,.txt,.html" style="display: none;" onchange="handleFileUpload(event)">
+              <div class="dropzone-icon">
+                <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </div>
+              <span class="dropzone-text">Click to select files or drag & drop here</span>
+              <span class="dropzone-sub">Supported formats: Markdown (.md), Plain Text (.txt), HTML (.html)</span>
+            </div>
+
+            <!-- Uploaded file queue preview -->
+            <div id="file-queue-preview" class="file-queue-preview" style="display: none;"></div>
+          </div>
+
+          <!-- Ingestion Card 2: Remote URL Crawler -->
+          <div class="ingest-card">
+            <div class="card-badge">Method 2</div>
+            <h3 class="card-title">Crawl Remote Documentation URL</h3>
+            <p class="card-desc">Crawl and sanitize technical documentation pages. Automatically strips scripts, styles, and navigational chrome to index pure technical content.</p>
+
+            <div class="url-input-container">
+              <input 
+                type="url" 
+                id="url-input" 
+                class="form-input" 
+                placeholder="https://docs.pydantic.dev/latest/concepts/models/"
+              />
+              <button class="primary-btn" id="ingest-url-btn" onclick="handleUrlIngest()">
+                <span>Fetch & Index</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+
+            <!-- Quick Preset URLs -->
+            <div class="presets-section">
+              <span class="presets-label">Quick Presets:</span>
+              <div class="preset-chips">
+                <button class="preset-pill" onclick="setPresetUrl('https://fastapi.tiangolo.com/tutorial/dependencies/')">
+                  FastAPI Tutorial
+                </button>
+                <button class="preset-pill" onclick="setPresetUrl('https://docs.pydantic.dev/latest/concepts/models/')">
+                  Pydantic Models
+                </button>
+                <button class="preset-pill" onclick="setPresetUrl('https://langchain-ai.github.io/langgraph/concepts/high_level/')">
+                  LangGraph Guide
+                </button>
+              </div>
+            </div>
+
+          </div>
+
         </div>
 
-        <div id="ingest-status-box" style="margin-top: 1.25rem; display: none; padding: 1rem; border-radius: var(--radius-md); font-size: 0.9rem;"></div>
+        <!-- Ingestion Status Alert Box -->
+        <div id="ingest-status-box" class="status-banner" style="display: none;"></div>
+
       </div>
     </section>
 
   </main>
+
+  <!-- Global Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Qualitative Feedback Modal -->
+  <div id="feedback-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Help Us Improve the Assistant</h3>
+        <button class="modal-close" onclick="closeFeedbackModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">What was missing or inaccurate about this response?</p>
+        <textarea id="feedback-comment-input" class="modal-textarea" rows="3" placeholder="e.g. Code syntax used an older API version, or missing error handling..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="secondary-btn" onclick="closeFeedbackModal()">Cancel</button>
+        <button class="primary-btn" onclick="submitDetailedFeedback()">Submit Feedback</button>
+      </div>
+    </div>
+  </div>
 
   <script src="/static/app.js"></script>
 </body>

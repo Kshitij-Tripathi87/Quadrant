@@ -30,6 +30,34 @@ class QueryResponse(BaseModel):
     retries_used: int = Field(default=0, description="Number of query reformulations executed.")
     grounded: str = Field(description="Self-RAG Groundedness check result ('grounded' or 'not grounded').")
     execution_steps: List[str] = Field(default_factory=list, description="Nodes traversed in the LangGraph workflow.")
+    execution_time_ms: float = Field(default=0.0, description="End-to-end execution latency in milliseconds.")
+
+# --- /query/history models ---
+class HistoryItem(BaseModel):
+    id: str
+    session_id: str
+    question: str
+    answer: str
+    query_type: Optional[str] = "conceptual"
+    retries: int = 0
+    grounded: Optional[str] = "grounded"
+    sources: List[SourceCitation] = Field(default_factory=list)
+    created_at: Optional[str] = None
+
+class HistoryResponse(BaseModel):
+    session_id: str
+    total_messages: int
+    messages: List[HistoryItem]
+
+class SessionListItem(BaseModel):
+    session_id: str
+    question: str
+    created_at: str
+    turn_count: int
+
+class SessionListResponse(BaseModel):
+    sessions: List[SessionListItem]
+
 
 # --- /ingest models ---
 class IngestRequest(BaseModel):
@@ -74,5 +102,7 @@ class HealthResponse(BaseModel):
     status: str
     app_name: str
     llm_provider: str
+    model_name: Optional[str] = "gemini-3.5-flash-lite"
     embedding_provider: str
     vector_store_count: int
+

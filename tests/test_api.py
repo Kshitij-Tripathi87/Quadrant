@@ -44,3 +44,19 @@ def test_ingest_empty_urls():
     payload = {"urls": []}
     response = client.post("/api/v1/ingest", json=payload)
     assert response.status_code in [400, 422]
+
+def test_query_history_endpoint():
+    response = client.get("/api/v1/query/history?session_id=test-session-xyz")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["session_id"] == "test-session-xyz"
+    assert "messages" in data
+    assert isinstance(data["messages"], list)
+
+def test_query_sessions_endpoint():
+    response = client.get("/api/v1/query/sessions")
+    assert response.status_code == 200
+    data = response.json()
+    assert "sessions" in data
+    assert isinstance(data["sessions"], list)
+

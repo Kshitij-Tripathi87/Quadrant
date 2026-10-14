@@ -118,5 +118,57 @@ class StorageRepository:
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
 
+    def get_session_queries(self, session_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """Retrieves historical queries and answers for a given session."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT id, session_id, question, answer, query_type, retries, sources_json, grounded, created_at
+                FROM queries
+                WHERE session_id = ?
+                ORDER BY created_at ASC
+                LIMIT ?
+                """,
+                (session_id, limit),
+            )
+            rows = cursor.fetchall()
+            results = []
+            for row in rows:
+                item = dict(row)
+                try:
+                    item["sources"] = json.loads(item.get("sources_json") or "[]")
+                except Exception:
+                    item["sources"] = []
+                results.append(item)
+            return results
+
+    def get_recent_sessions(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """Retrieves a list of unique recent sessions with their latest question and timestamp."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                SELECT session_id, question, created_at, COUNT(*) as turn_count
+                FROM queries
+                GROUP BY session_id
+                ORDER BY MAX(created_at) DESC
+                LIMIT ?
+                """,
+                (limit,),
+            )
+            rows = cursor.fetchall()
+            return [dict(row) for row in rows]
+
+    def clear_session_queries(self, session_id: str) -> int:
+        """Deletes all queries for a given session ID."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM queries WHERE session_id = ?", (session_id,))
+            deleted = cursor.rowcount
+            conn.commit()
+            return deleted
+
 # Singleton instance
 storage_repo = StorageRepository()
+

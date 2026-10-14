@@ -1,6 +1,17 @@
+import time
 import uuid
-from fastapi import APIRouter, HTTPException, status
-from src.api.schemas import QueryRequest, QueryResponse, SourceCitation
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Query, status
+
+from src.api.schemas import (
+    QueryRequest,
+    QueryResponse,
+    SourceCitation,
+    HistoryResponse,
+    HistoryItem,
+    SessionListResponse,
+    SessionListItem,
+)
 from src.graph.workflow import rag_app
 from src.storage.repository import storage_repo
 
@@ -15,6 +26,7 @@ router = APIRouter(prefix="/query", tags=["Query"])
 )
 async def query_documentation(request: QueryRequest) -> QueryResponse:
     session_id = request.session_id or str(uuid.uuid4())
+    start_time = time.perf_counter()
 
     try:
         initial_state = {
@@ -33,6 +45,7 @@ async def query_documentation(request: QueryRequest) -> QueryResponse:
         retries = final_state.get("retry_count", 0)
         grounded = final_state.get("hallucination_grade", "grounded")
         steps = final_state.get("execution_steps", [])
+        execution_time_ms = round((time.perf_counter() - start_time) * 1000, 2)
 
         citations = [
             SourceCitation(
@@ -64,10 +77,104 @@ async def query_documentation(request: QueryRequest) -> QueryResponse:
             retries_used=retries,
             grounded=grounded,
             execution_steps=steps,
+            execution_time_ms=execution_time_ms,
         )
 
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error executing documentation assistant: {str(e)}"
+        )
+
+
+@router.get(
+    "/history",
+    response_model=HistoryResponse,
+    summary="Retrieve session query history",
+    description="Returns previous queries and answers for a given session ID."
+)
+async def get_query_history(
+    session_id: str = Query(..., description="Unique session identifier"),
+    limit: int = Query(50, ge=1, le=100, description="Max messages to fetch")
+) -> HistoryResponse:
+    try:
+        records = storage_repo.get_session_queries(session_id=session_id, limit=limit)
+        items = []
+        for r in records:
+            sources = [
+                SourceCitation(
+                    source=s.get("source", ""),
+                    title=s.get("title", ""),
+                    header_path=s.get("header_path", ""),
+                    snippet=s.get("snippet", ""),
+                )
+                for s in r.get("sources", [])
+            ]
+            items.append(
+                HistoryItem(
+                    id=r["id"],
+                    session_id=r["session_id"],
+                    question=r["question"],
+                    answer=r["answer"],
+                    query_type=r.get("query_type", "conceptual"),
+                    retries=r.get("retries", 0),
+                    grounded=r.get("grounded", "grounded"),
+                    sources=sources,
+                    created_at=r.get("created_at"),
+                )
+            )
+
+        return HistoryResponse(
+            session_id=session_id,
+            total_messages=len(items),
+            messages=items,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch session history: {str(e)}"
+        )
+
+
+@router.get(
+    "/sessions",
+    response_model=SessionListResponse,
+    summary="List recent active conversation sessions",
+    description="Returns recent conversation sessions for sidebar navigation."
+)
+async def list_recent_sessions(
+    limit: int = Query(20, ge=1, le=50, description="Max sessions to return")
+) -> SessionListResponse:
+    try:
+        rows = storage_repo.get_recent_sessions(limit=limit)
+        sessions = [
+            SessionListItem(
+                session_id=row["session_id"],
+                question=row["question"],
+                created_at=str(row["created_at"]),
+                turn_count=row["turn_count"],
+            )
+            for row in rows
+        ]
+        return SessionListResponse(sessions=sessions)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch sessions: {str(e)}"
+        )
+
+
+@router.delete(
+    "/history/{session_id}",
+    summary="Clear conversation history",
+    description="Deletes all queries associated with a specific session."
+)
+async def clear_session_history(session_id: str):
+    try:
+        deleted = storage_repo.clear_session_queries(session_id)
+        return {"session_id": session_id, "deleted_count": deleted, "status": "cleared"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to clear session: {str(e)}"
         )
