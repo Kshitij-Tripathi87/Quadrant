@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # LLM Settings
-    DEFAULT_LLM_PROVIDER: str = Field(default="groq", description="LLM Provider: groq, openai, gemini, anthropic")
+    DEFAULT_LLM_PROVIDER: str = Field(default="gemini", description="LLM Provider: gemini, groq, openai, anthropic")
     GROQ_API_KEY: str = Field(default="")
     OPENAI_API_KEY: str = Field(default="")
     GEMINI_API_KEY: str = Field(default="")
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     GROQ_MODEL: str = Field(default="llama-3.3-70b-versatile")
     OPENAI_MODEL: str = Field(default="gpt-4o-mini")
-    GEMINI_MODEL: str = Field(default="gemini-1.5-flash")
+    GEMINI_MODEL: str = Field(default="gemini-3.6-flash")
 
     # Embedding Settings
     EMBEDDING_PROVIDER: str = Field(default="fastembed", description="fastembed, huggingface, openai")
