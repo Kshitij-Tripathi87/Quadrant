@@ -1,35 +1,41 @@
-from typing import Literal, List
+from typing import List
 from pydantic import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
 from src.graph.state import GraphState, DocumentChunk
 from src.core.llm import get_llm
 
-class GradeChunk(BaseModel):
-    binary_score: Literal["relevant", "irrelevant"] = Field(
-        description="Score whether the document contains information, keywords, or code relevant to the question."
-    )
-    reasoning: str = Field(
-        description="Brief explanation why this document is relevant or irrelevant."
-    )
+class ChunkGrade(BaseModel):
+    chunk_index: int = Field(description="The index of the document chunk being evaluated (0-based)")
+    is_relevant: bool = Field(description="True if relevant to the technical question, False if irrelevant")
+    reasoning: str = Field(default="", description="Brief reason for the relevance score")
 
-GRADER_PROMPT = ChatPromptTemplate.from_messages([
+class BatchGraderOutput(BaseModel):
+    evaluations: List[ChunkGrade] = Field(description="List of evaluations for each chunk")
+
+BATCH_GRADER_PROMPT = ChatPromptTemplate.from_messages([
     (
         "system",
-        """You are an objective document relevance evaluator for technical documentation RAG pipelines.
-Your job is to assess whether a retrieved document chunk is relevant to the user question.
-Grade as 'relevant' if the document contains keywords, semantic concepts, architecture details, or code samples that help answer the question.
-Grade as 'irrelevant' if the document is unrelated, off-topic, or cannot assist in answering the question.
-Be rigorous but reasonable."""
+        """You are an expert, objective document relevance evaluator for technical documentation RAG pipelines.
+Evaluate the provided numbered candidate document chunks against the user's technical question.
+Grade each chunk as relevant (is_relevant=True) if it contains code, conceptual definitions, methods, or details that help answer the question.
+Grade as irrelevant (is_relevant=False) only if the chunk is completely unrelated or off-topic.
+Be generous toward technical context that can assist the answer."""
     ),
     (
         "human",
-        "Retrieved Document:\n\n{document}\n\nUser Question: {question}"
+        """User Question:
+{question}
+
+Candidate Document Chunks:
+{chunks_formatted}
+
+Evaluate all chunks and return the relevance list."""
     )
 ])
 
 def document_grader_node(state: GraphState) -> dict:
     """
-    Evaluates retrieved chunks, scoring each as 'relevant' or 'irrelevant'.
+    Evaluates retrieved chunks in a single batch LLM call for minimal latency.
     Retains only relevant documents in state['relevant_documents'].
     """
     question = state.get("question", "")
@@ -37,41 +43,59 @@ def document_grader_node(state: GraphState) -> dict:
     steps = state.get("execution_steps", []).copy()
     steps.append("document_grader")
 
-    print(f"[Document Grader Node] Grading {len(documents)} retrieved chunk(s)...")
+    if not documents:
+        print("[Document Grader Node] No documents to grade.")
+        return {
+            "relevant_documents": [],
+            "execution_steps": steps,
+        }
+
+    # Format all candidate chunks together for a single batch evaluation call
+    chunks_text_list = []
+    for idx, doc in enumerate(documents):
+        title = doc.get("metadata", {}).get("title", "Document")
+        header = doc.get("metadata", {}).get("header_path", "")
+        preview = doc.get("content", "")[:600]
+        chunks_text_list.append(f"[Chunk {idx}] (Title: {title} | Section: {header}):\n{preview}")
+
+    chunks_formatted = "\n\n---\n\n".join(chunks_text_list)
 
     relevant_docs: List[DocumentChunk] = []
-    
+
     try:
         llm = get_llm(temperature=0.0)
-        structured_grader = llm.with_structured_output(GradeChunk)
-        grader_chain = GRADER_PROMPT | structured_grader
+        structured_grader = llm.with_structured_output(BatchGraderOutput)
+        grader_chain = BATCH_GRADER_PROMPT | structured_grader
 
-        for doc in documents:
-            content = doc.get("content", "")
-            try:
-                res: GradeChunk = grader_chain.invoke({
-                    "document": content,
-                    "question": question
-                })
-                score = res.binary_score
-                reasoning = res.reasoning
-            except Exception as e:
-                print(f"[Document Grader] Error grading chunk: {e}, defaulting to 'relevant'")
-                score = "relevant"
-                reasoning = "Grading fallback"
+        # Single LLM call for all chunks!
+        res: BatchGraderOutput = grader_chain.invoke({
+            "question": question,
+            "chunks_formatted": chunks_formatted
+        })
 
-            graded_chunk: DocumentChunk = {
-                "content": content,
-                "metadata": doc.get("metadata", {}),
-                "relevance_score": score,
-                "reasoning": reasoning,
-            }
+        relevant_indices = {
+            item.chunk_index for item in res.evaluations if item.is_relevant
+        }
 
-            if score == "relevant":
-                relevant_docs.append(graded_chunk)
+        # If LLM deemed at least one relevant, filter by it
+        if relevant_indices:
+            for idx, doc in enumerate(documents):
+                score = "relevant" if idx in relevant_indices else "irrelevant"
+                graded_chunk: DocumentChunk = {
+                    "content": doc.get("content", ""),
+                    "metadata": doc.get("metadata", {}),
+                    "relevance_score": score,
+                    "reasoning": "Evaluated in batch"
+                }
+                if score == "relevant":
+                    relevant_docs.append(graded_chunk)
+        else:
+            # If none flagged or model was too strict, fallback to top document
+            relevant_docs = documents[:1]
 
     except Exception as e:
-        print(f"[Document Grader] LLM error: {e}. Passing documents through as fallback.")
+        print(f"[Document Grader] Batch grading fallback due to: {e}")
+        # Fast fallback: pass top documents through
         relevant_docs = documents
 
     print(f"[Document Grader Node] {len(relevant_docs)} / {len(documents)} chunks deemed relevant.")
