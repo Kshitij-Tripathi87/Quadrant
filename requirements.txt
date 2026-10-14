@@ -1,0 +1,36 @@
+# Web Framework & Core
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.7.0
+pydantic-settings>=2.2.0
+python-multipart>=0.0.9
+python-dotenv>=1.0.1
+aiosqlite>=0.20.0
+
+# LangChain & LangGraph Ecosystem
+langgraph>=0.2.0
+langchain>=0.2.0
+langchain-core>=0.2.0
+langchain-community>=0.2.0
+langchain-text-splitters>=0.2.0
+
+# LLM Providers (Multi-Provider Support)
+langchain-groq>=0.1.5
+langchain-openai>=0.1.8
+langchain-google-genai>=1.0.6
+
+# Vector Store & Embeddings
+chromadb>=0.5.0
+langchain-chroma>=1.1.0
+fastembed>=0.3.1
+# sentence-transformers>=3.0.0 (optional, fastembed is preferred for fast local inference)
+
+# Web Search Fallback & Parsing
+duckduckgo-search>=6.1.0
+tavily-python>=0.3.3
+beautifulsoup4>=4.12.3
+httpx>=0.27.0
+
+# Testing & Dev
+pytest>=8.2.0
+pytest-asyncio>=0.23.7

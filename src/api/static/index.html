@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Express Analytics | RAG Technical Documentation Assistant</title>
+  <meta name="description" content="Self-corrective LangGraph RAG assistant for technical documentation, featuring query expansion, document grading, citations, and hallucination checks.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-info">
+          <h1>Express Analytics <span class="badge-tag">Self-Corrective LangGraph</span></h1>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs" role="tablist">
+        <button id="tab-chat-btn" class="tab-btn active" onclick="switchTab('chat')">Assistant Q&A</button>
+        <button id="tab-corpus-btn" class="tab-btn" onclick="switchTab('corpus')">Corpus Explorer</button>
+        <button id="tab-ingest-btn" class="tab-btn" onclick="switchTab('ingest')">Ingest Documents</button>
+      </nav>
+
+      <!-- System Health Indicator -->
+      <div class="system-status">
+        <span class="status-indicator" id="health-dot"></span>
+        <span id="health-text">Online</span>
+        <span class="badge-tag" id="vectors-badge">0 Chunks</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+
+    <!-- Tab 1: Chat Assistant -->
+    <section id="tab-chat" class="tab-pane active" aria-labelledby="tab-chat-btn">
+      <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+          <div class="empty-chat" id="empty-state">
+            <div style="font-size: 2.8rem;">📚</div>
+            <h2>Technical Documentation Assistant</h2>
+            <p>Ask in-depth questions about FastAPI, LangGraph, Pydantic, or uploaded documentation.</p>
+            
+            <div class="suggestion-grid">
+              <button class="chip-btn" onclick="sendSuggestion('How do I use yield in FastAPI dependencies for resource cleanup?')">
+                💡 How do I use yield in FastAPI dependencies?
+              </button>
+              <button class="chip-btn" onclick="sendSuggestion('What is LangGraph StateGraph and how do conditional edges work?')">
+                🔄 Explain LangGraph StateGraph conditional edges
+              </button>
+              <button class="chip-btn" onclick="sendSuggestion('How does Pydantic v2 use @field_validator to customize validation?')">
+                🛡️ Pydantic v2 @field_validator examples
+              </button>
+              <button class="chip-btn" onclick="sendSuggestion('Explain REST API idempotency and HTTP status codes.')">
+                🌐 REST API HTTP methods & idempotency
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input Bar -->
+        <div class="chat-input-bar">
+          <div class="input-container">
+            <input 
+              type="text" 
+              id="user-input" 
+              class="chat-input" 
+              placeholder="Ask a technical question... (e.g. How does dependency injection work with yield?)"
+              autocomplete="off"
+            />
+          </div>
+          <button id="send-button" class="send-btn" onclick="handleSend()">
+            <span>Ask</span> ➔
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 2: Corpus Explorer -->
+    <section id="tab-corpus" class="tab-pane" aria-labelledby="tab-corpus-btn">
+      <div class="view-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <div>
+            <h2>Indexed Technical Documentation</h2>
+            <p>Browse documents currently indexed in ChromaDB with their chunk distribution.</p>
+          </div>
+          <button class="send-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="loadDocuments()">
+            🔄 Refresh Corpus
+          </button>
+        </div>
+        <div class="doc-grid" id="documents-grid">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 3: Ingest Documents -->
+    <section id="tab-ingest" class="tab-pane" aria-labelledby="tab-ingest-btn">
+      <div class="view-card">
+        <h2>Ingest New Technical Documentation</h2>
+        <p>Expand the knowledge base by uploading Markdown/HTML files or crawling external technical documentation URLs.</p>
+
+        <!-- File Upload Form -->
+        <h3 style="font-size: 1.05rem; margin-bottom: 0.8rem; color: #a5b4fc;">Option 1: Upload Documentation Files</h3>
+        <div class="dropzone" id="file-dropzone" onclick="document.getElementById('file-input').click()">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">📄</div>
+          <p style="font-weight: 600; margin-bottom: 0.2rem;">Click to upload or drag & drop files</p>
+          <span style="font-size: 0.8rem; color: var(--text-dim);">Accepts Markdown (.md), Plain Text (.txt), HTML (.html)</span>
+          <input type="file" id="file-input" multiple accept=".md,.markdown,.txt,.html" style="display: none;" onchange="handleFileUpload(event)">
+        </div>
+
+        <!-- URL Ingestion Form -->
+        <h3 style="font-size: 1.05rem; margin: 1.5rem 0 0.8rem; color: #a5b4fc;">Option 2: Crawl Documentation from URL</h3>
+        <div class="url-input-group">
+          <input 
+            type="url" 
+            id="url-input" 
+            class="chat-input" 
+            placeholder="https://docs.pydantic.dev/latest/concepts/models/"
+          />
+          <button class="send-btn" id="ingest-url-btn" onclick="handleUrlIngest()">
+            Fetch & Index
+          </button>
+        </div>
+
+        <div id="ingest-status-box" style="margin-top: 1.25rem; display: none; padding: 1rem; border-radius: var(--radius-md); font-size: 0.9rem;"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
