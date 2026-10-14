@@ -320,15 +320,60 @@ curl -X POST "http://localhost:8000/api/v1/feedback" \
 
 ---
 
-### 6. `GET /api/v1/health` — System Health & Index Readiness
+### 6. `GET /api/v1/query/sessions` — List Recent Conversation Sessions
+Returns active and past conversation threads for sidebar session management.
+
+**Response (200 OK):**
+```json
+{
+  "sessions": [
+    {
+      "session_id": "session-dev-123",
+      "question": "How do I implement dependency injection with yield in FastAPI?",
+      "created_at": "2026-10-14 11:13:45",
+      "turn_count": 2
+    }
+  ]
+}
+```
+
+---
+
+### 7. `GET /api/v1/query/history` — Fetch Session Conversation History
+Retrieves historical query-response pairs, execution trails, and citations for a specific `session_id`.
+
+**Response (200 OK):**
+```json
+{
+  "session_id": "session-dev-123",
+  "total_messages": 2,
+  "messages": [
+    {
+      "id": "893c5d7a-12e0-47b2-8ea9-f80e224e75c1",
+      "session_id": "session-dev-123",
+      "question": "How do I implement dependency injection with yield in FastAPI?",
+      "answer": "To implement dependency injection with teardown in FastAPI...",
+      "query_type": "how-to",
+      "retries": 0,
+      "grounded": "grounded",
+      "sources": [...]
+    }
+  ]
+}
+```
+
+---
+
+### 8. `GET /api/v1/health` — System Health & Index Readiness
 **Response (200 OK):**
 ```json
 {
   "status": "healthy",
   "app_name": "Technical Documentation RAG Assistant",
-  "llm_provider": "groq",
+  "llm_provider": "gemini",
+  "model_name": "gemini-3.5-flash-lite",
   "embedding_provider": "fastembed",
-  "vector_store_count": 24
+  "vector_store_count": 27
 }
 ```
 
@@ -357,10 +402,11 @@ Copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
 ```
-Set your preferred provider (Groq recommended for free, ultra-fast inference):
+Set Google Gemini (default provider) with your API key:
 ```ini
-DEFAULT_LLM_PROVIDER="groq"
-GROQ_API_KEY="gsk_your_groq_api_key"
+DEFAULT_LLM_PROVIDER="gemini"
+GEMINI_API_KEY="your-gemini-api-key"
+GEMINI_MODEL="gemini-3.5-flash-lite"
 ```
 
 ### Step 3: Run the Application
@@ -370,6 +416,7 @@ python -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
 
 - **Modern Web Interface:** Open [http://localhost:8000/](http://localhost:8000/) in your browser.
 - **Interactive Swagger Docs:** Open [http://localhost:8000/docs](http://localhost:8000/docs).
+
 
 ---
 
