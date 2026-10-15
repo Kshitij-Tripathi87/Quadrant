@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 from typing import List
-from fastapi import APIRouter, UploadFile, File, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, HTTPException, status, Request
 from langchain_core.documents import Document
 from src.api.schemas import IngestRequest, IngestResponse
 from src.ingestion.loader import DocumentLoader
@@ -11,22 +11,15 @@ from src.config import settings
 
 router = APIRouter(prefix="/ingest", tags=["Ingestion"])
 
-@router.post(
-    "",
-    response_model=IngestResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Ingest new documents from URLs",
-    description="Crawls, cleans, chunks, and indexes documents from a list of URLs."
-)
-async def ingest_urls(payload: IngestRequest) -> IngestResponse:
-    if not payload.urls:
+async def _process_urls(urls: List[str]) -> IngestResponse:
+    if not urls:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No URLs provided for ingestion."
         )
 
     loaded_docs: List[Document] = []
-    for url in payload.urls:
+    for url in urls:
         try:
             doc = await DocumentLoader.load_url(url)
             loaded_docs.append(doc)
@@ -55,6 +48,60 @@ async def ingest_urls(payload: IngestRequest) -> IngestResponse:
         total_chunks=total_chunks,
         message=f"Successfully indexed {len(loaded_docs)} document(s) into {total_chunks} chunks."
     )
+
+@router.post(
+    "",
+    response_model=IngestResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Ingest new documents from URLs or file uploads",
+    description="Crawls and indexes documents from JSON URLs or multipart form-data file uploads."
+)
+async def ingest_documents_endpoint(request: Request) -> IngestResponse:
+    content_type = request.headers.get("content-type", "")
+    if "multipart/form-data" in content_type:
+        form = await request.form()
+        uploaded_files = form.getlist("files") or form.getlist("file")
+        valid_files = [f for f in uploaded_files if hasattr(f, "filename") and f.filename]
+        if valid_files:
+            return await ingest_files(valid_files)
+        
+        url_vals = form.getlist("urls") or form.getlist("url")
+        extracted_urls = []
+        for val in url_vals:
+            if isinstance(val, str):
+                extracted_urls.extend([u.strip() for u in val.split(",") if u.strip()])
+        if extracted_urls:
+            return await _process_urls(extracted_urls)
+            
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No files or URLs found in multipart form data."
+        )
+
+    # Standard JSON body
+    try:
+        data = await request.json()
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid JSON payload provided."
+        )
+
+    try:
+        payload = IngestRequest(**data)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Validation error: {e}"
+        )
+
+    if not payload.urls:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No URLs provided for ingestion."
+        )
+
+    return await _process_urls(payload.urls)
 
 @router.post(
     "/upload",

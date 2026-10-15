@@ -53,10 +53,71 @@ def test_query_history_endpoint():
     assert "messages" in data
     assert isinstance(data["messages"], list)
 
-def test_query_sessions_endpoint():
-    response = client.get("/api/v1/query/sessions")
+def test_root_endpoints_support():
+    # Test root GET /health
+    res_health = client.get("/health")
+    assert res_health.status_code == 200
+    assert res_health.json()["status"] == "healthy"
+
+    # Test root GET /documents
+    res_docs = client.get("/documents")
+    assert res_docs.status_code == 200
+    assert "total_documents" in res_docs.json()
+
+    # Test root POST /feedback
+    res_fb = client.post("/feedback", json={"query_id": "test-123", "rating": "up"})
+    assert res_fb.status_code == 201
+
+def test_ingest_file_upload():
+    # Test file upload via multipart/form-data on /ingest
+    file_content = b"# Sample Tool\n\nThis is a sample markdown tool reference.\n\n## Syntax\n\n`sample()`"
+    files = {"files": ("sample_tool.md", file_content, "text/markdown")}
+    response = client.post("/ingest", files=files)
+    assert response.status_code == 201
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["indexed_documents"] >= 1
+    assert data["total_chunks"] >= 1
+
+def test_query_endpoint_validation():
+    # Test empty question validation
+    response = client.post("/api/v1/query", json={"question": "   "})
+    assert response.status_code in [400, 422]
+
+def test_query_endpoint_execution(monkeypatch):
+    mock_final_state = {
+        "generation": "FastAPI dependency injection uses Depends. [Source: FastAPI Guide > Dependencies]",
+        "query_type": "how-to",
+        "sources": [{
+            "source": "fastapi.md",
+            "title": "FastAPI Guide",
+            "header_path": "Dependencies",
+            "snippet": "Use Depends() to declare dependencies."
+        }],
+        "retry_count": 0,
+        "hallucination_grade": "grounded",
+        "execution_steps": ["query_analysis", "retriever", "document_grader", "generator", "hallucination_check"],
+    }
+    monkeypatch.setattr("src.api.routes.query.rag_app.invoke", lambda state: mock_final_state)
+
+    # Test versioned endpoint
+    response = client.post("/api/v1/query", json={"question": "How do I use Depends in FastAPI?"})
     assert response.status_code == 200
     data = response.json()
-    assert "sessions" in data
-    assert isinstance(data["sessions"], list)
+    assert "query_id" in data
+    assert "FastAPI dependency injection" in data["answer"]
+    assert data["query_type"] == "how-to"
+    assert len(data["sources"]) == 1
+    assert data["sources"][0]["title"] == "FastAPI Guide"
+    assert data["grounded"] == "grounded"
+    assert data["execution_steps"] == mock_final_state["execution_steps"]
+
+    # Test root endpoint /query
+    res_root = client.post("/query", json={"question": "How do I use Depends in FastAPI?"})
+    assert res_root.status_code == 200
+    data_root = res_root.json()
+    assert "query_id" in data_root
+    assert "FastAPI dependency injection" in data_root["answer"]
+
+
 

@@ -28,6 +28,12 @@ _QUERY_CACHE = {}
     description="Executes the self-corrective LangGraph workflow and returns a grounded answer with citations."
 )
 async def query_documentation(request: QueryRequest) -> QueryResponse:
+    if not request.question or not request.question.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Question cannot be empty or solely whitespace."
+        )
+
     session_id = request.session_id or str(uuid.uuid4())
     start_time = time.perf_counter()
     cache_key = request.question.strip().lower()

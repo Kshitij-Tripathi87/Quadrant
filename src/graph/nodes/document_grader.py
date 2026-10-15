@@ -90,8 +90,8 @@ def document_grader_node(state: GraphState) -> dict:
                 if score == "relevant":
                     relevant_docs.append(graded_chunk)
         else:
-            # If none flagged or model was too strict, fallback to top document
-            relevant_docs = documents[:1]
+            # All chunks evaluated as irrelevant -> empty list triggers self-corrective rewrite or web fallback
+            relevant_docs = []
 
     except Exception as e:
         print(f"[Document Grader] Batch grading fallback due to: {e}")

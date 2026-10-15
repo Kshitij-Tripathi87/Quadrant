@@ -44,12 +44,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API Routers
+# Include API Routers with /api/v1 prefix (standard versioned endpoints)
 app.include_router(query.router, prefix="/api/v1")
 app.include_router(ingest.router, prefix="/api/v1")
 app.include_router(documents.router, prefix="/api/v1")
 app.include_router(feedback.router, prefix="/api/v1")
 app.include_router(health.router, prefix="/api/v1")
+
+# Also include API Routers at root level (as specified in assignment PRD: /query, /ingest, /documents, /feedback, /health)
+app.include_router(query.router)
+app.include_router(ingest.router)
+app.include_router(documents.router)
+app.include_router(feedback.router)
+app.include_router(health.router)
 
 # Mount Static UI directory
 static_dir = Path(__file__).resolve().parent / "static"
