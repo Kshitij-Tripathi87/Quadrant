@@ -7,7 +7,10 @@ def init_db():
     db_path = Path(settings.SQLITE_DB_PATH)
     db_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with sqlite3.connect(str(db_path)) as conn:
+    with sqlite3.connect(str(db_path), timeout=30.0) as conn:
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA synchronous=NORMAL;")
+        conn.execute("PRAGMA busy_timeout=30000;")
         cursor = conn.cursor()
         
         # Queries audit table

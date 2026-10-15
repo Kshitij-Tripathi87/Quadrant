@@ -38,7 +38,25 @@ def seed_default_corpus() -> int:
         return 0
 
     print(f"Found {len(documents)} raw document(s). Starting indexing pipeline...")
-    return index_documents(documents)
+    chunker = TechnicalDocumentChunker()
+    total_indexed = 0
+    from src.storage.repository import storage_repo
+
+    for doc in documents:
+        chunks = chunker.chunk_documents([doc])
+        if chunks:
+            vector_store_manager.add_documents(chunks)
+            total_indexed += len(chunks)
+            source_path = doc.metadata.get("source", "")
+            title = doc.metadata.get("title") or Path(source_path).stem.replace("_", " ").title()
+            storage_repo.record_document(
+                source=source_path,
+                title=title,
+                chunk_count=len(chunks),
+                source_type="file",
+            )
+    print(f"Successfully indexed and registered {total_indexed} chunks across {len(documents)} documents.")
+    return total_indexed
 
 if __name__ == "__main__":
     count = seed_default_corpus()
