@@ -379,7 +379,43 @@ Retrieves historical query-response pairs, execution trails, and citations for a
 
 ---
 
-## 8. Setup & Installation Guide
+## 8. Desktop Application & Windows Installer (.exe / .msi)
+
+DocuGraph AI can be packaged and distributed as a native Windows desktop application. After installation, users simply double-click the desktop shortcut icon to launch the application. The system automatically initializes the embedded FastAPI server, self-corrective LangGraph pipeline, and ChromaDB vector store, presenting the rich web frontend in a dedicated, hardware-accelerated desktop window.
+
+### 8.1 Windows Installer Packages (`dist/`)
+
+The repository builds ready-to-use Windows installers:
+
+| Package | Path | Description |
+|---|---|---|
+| **Windows Setup Wizard (.exe)** | [`dist/DocuGraphAI_Setup.exe`](file:///c:/Users/21330/Documents/RAG_Project_sample/dist/DocuGraphAI_Setup.exe) | Graphical Windows installer wizard with progress bar, custom icon, desktop shortcut, and uninstaller. |
+| **Windows Installer Package (.msi)** | [`dist/DocuGraphAI_Setup.msi`](file:///c:/Users/21330/Documents/RAG_Project_sample/dist/DocuGraphAI_Setup.msi) | Enterprise `.msi` package compatible with Windows Installer (`msiexec /i DocuGraphAI_Setup.msi`). |
+| **1-Click Batch Installer** | [`Install_DocuGraphAI.bat`](file:///c:/Users/21330/Documents/RAG_Project_sample/Install_DocuGraphAI.bat) | Instant installer script creating desktop & start menu shortcuts directly. |
+| **Portable Desktop Executable** | [`dist/DocuGraphAI/DocuGraphAI.exe`](file:///c:/Users/21330/Documents/RAG_Project_sample/dist/DocuGraphAI/DocuGraphAI.exe) | Portable binary running without prior installation. |
+
+### 8.2 Installation & Launch Flow
+
+1. **Download & Run Installer:** Double-click `DocuGraphAI_Setup.exe` (or run `msiexec /i DocuGraphAI_Setup.msi`).
+2. **Setup Wizard:** Click **"Install Now"** (installs to `%LOCALAPPDATA%\Programs\DocuGraphAI`).
+3. **Desktop Shortcut:** The installer places a shortcut named **"DocuGraph AI"** with the high-resolution application icon on your Desktop and Start Menu.
+4. **Launch:** Click the **DocuGraph AI** desktop icon. The application window opens with the complete self-corrective RAG pipeline running.
+5. **Clean Exit & Uninstallation:** Closing the desktop window automatically shuts down the background server. Running `Uninstall.bat` cleanly removes all installed files and shortcuts.
+
+### 8.3 Running Desktop App from Source
+
+To launch the desktop application directly in Python:
+```powershell
+.\.venv\Scripts\python desktop_app.py
+```
+- For automated testing / verification:
+  ```powershell
+  .\.venv\Scripts\python desktop_app.py --check
+  ```
+
+---
+
+## 9. Setup & Development Guide (CLI / Server)
 
 ### Prerequisites
 - Python 3.11+
@@ -409,7 +445,7 @@ GEMINI_API_KEY="your-gemini-api-key"
 GEMINI_MODEL="gemini-3.5-flash-lite"
 ```
 
-### Step 3: Run the Application
+### Step 3: Run the Application Server
 ```bash
 python -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
 ```
