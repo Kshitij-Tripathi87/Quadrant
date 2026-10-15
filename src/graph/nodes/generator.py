@@ -88,8 +88,9 @@ def generator_node(state: GraphState) -> dict:
             "context": full_context,
         })
     except Exception as e:
-        print(f"[Generator Node] Error invoking LLM: {e}")
-        answer = f"Error generating answer: {e}\n\nRetrieved context was:\n{full_context[:500]}..."
+        print(f"[Generator Node] LLM invocation failed ({e}). Activating zero-downtime extractive fallback synthesizer.")
+        from src.core.fallback import synthesize_extractive_answer
+        answer = synthesize_extractive_answer(question, relevant_docs, error_reason=str(e))
 
     return {
         "generation": answer,

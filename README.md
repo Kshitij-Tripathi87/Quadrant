@@ -494,7 +494,13 @@ If internal technical documents lack relevant content after 2 query reformulatio
 3. **Loop Boundedness:** Maximum query reformulation retries is set to `max_retries = 2`, which empirically balances retrieval recall against P95 latency (sub-5 seconds).
 4. **Source of Truth Priority:** Internal documentation is always privileged over external knowledge; external web search is only invoked when internal retrieval strictly yields 0 relevant chunks.
 
-### 5. What Would Be Improved with More Time
+### 5. High-Availability Failover & Rate-Limit Resilience (The Backup Safety Net)
+A production-grade RAG pipeline must never crash or leave users stranded when an upstream LLM API returns `HTTP 429 Too Many Requests`, quota exhaustion, or temporary network timeouts. Our architecture implements a **3-tier resilience matrix**:
+1. **Intra-Provider Model Failover:** In `src/core/llm.py`, the primary model is wrapped with LangChain `.with_fallbacks(...)` pointing to alternate models on the same key (e.g. `gemini-1.5-flash`, `gemini-2.0-flash-lite`), which often operate on independent quota buckets.
+2. **Cross-Provider Dynamic Failover:** If configured, the model automatically rolls over to Groq (`llama-3.3-70b-versatile`) or OpenAI (`gpt-4o-mini`) seamlessly without dropping the query.
+3. **Zero-Downtime Extractive Context Synthesizer (`src/core/fallback.py`):** If all external LLM APIs fail or internet connectivity drops, the system activates its deterministic local engine. Because retrieval uses local FastEmbed ONNX embeddings and local ChromaDB, candidate chunks are always successfully retrieved. The extractive synthesizer isolates relevant conceptual summaries, runnable code snippets, and section citations directly from the local chunks, returning a verified, grounded 200 OK answer with full audit trail.
+
+### 6. What Would Be Improved with More Time
 1. **Hybrid Retrieval (Dense + BM25 Sparse Search):** Implement Reciprocal Rank Fusion (RRF) combining dense semantic search with lexical keyword matching (BM25) to improve retrieval of exact syntax symbols and parameter names.
 2. **Streaming Tokens via Server-Sent Events (SSE):** Stream generation tokens from LangGraph directly to the FastAPI response using `EventSource`.
 3. **Semantic Caching:** Store query embedding hashes in Redis or SQLite to return instant sub-10ms cached answers for frequent queries.

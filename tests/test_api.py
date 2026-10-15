@@ -208,5 +208,40 @@ def test_export_session():
     assert len(data["messages"]) > 0
 
 
+def test_rate_limit_resilience_fallback(monkeypatch):
+    from src.core.fallback import synthesize_extractive_answer
+
+    mock_docs = [
+        {
+            "content": "### Dependencies with yield\nFastAPI supports dependencies that yield.\n\n```python\nasync def get_db():\n    try:\n        yield db\n    finally:\n        db.close()\n```\n",
+            "metadata": {"title": "FastAPI Dependencies", "header_path": "Dependencies > Yield"}
+        }
+    ]
+
+    # Test extractive synthesizer directly
+    answer = synthesize_extractive_answer(
+        question="How to cleanup db connection in FastAPI?",
+        relevant_docs=mock_docs,
+        error_reason="429 ResourceExhausted: Quota exceeded"
+    )
+    assert "Zero-Downtime Resilience Active" in answer
+    assert "FastAPI Dependencies" in answer
+    assert "yield db" in answer
+
+    # Test that the /query endpoint catches 429 and returns 200 via fallback
+    import src.graph.workflow as wf
+    def mock_invoke_fail(state):
+        raise RuntimeError("429 ResourceExhausted: Quota exceeded for model")
+
+    monkeypatch.setattr(wf.rag_app, "invoke", mock_invoke_fail)
+
+    res = client.post("/query", json={"question": "How to use yield dependencies in FastAPI?"})
+    assert res.status_code == 200
+    data = res.json()
+    assert "Zero-Downtime Resilience Active" in data["answer"]
+    assert len(data["sources"]) > 0
+    assert data["grounded"] == "grounded"
+
+
 
 

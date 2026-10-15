@@ -43,8 +43,25 @@ def query_rewriter_node(state: GraphState) -> dict:
             "retry_count": retry_count,
         }).strip()
     except Exception as e:
-        print(f"[Query Rewriter] Error rewriting query: {e}")
-        new_query = f"{question} documentation guide reference"
+        print(f"[Query Rewriter] LLM rewrite failed ({e}). Using deterministic technical expander.")
+        import re
+        core_tokens = re.findall(r"@?[a-zA-Z0-9_\-\.]{3,}", question)
+        stopwords = {"how", "can", "tell", "what", "where", "which", "with", "from", "does", "explain", "about", "using", "your", "give", "show", "please", "into", "when"}
+        filtered = [t for t in core_tokens if t.lower() not in stopwords]
+
+        q_lower = question.lower()
+        extra_terms = []
+        if "yield" in q_lower:
+            extra_terms.extend(["FastAPI", "dependencies", "cleanup", "contextmanager"])
+        if "state" in q_lower or "graph" in q_lower:
+            extra_terms.extend(["LangGraph", "StateGraph", "workflow", "schema"])
+        if "validator" in q_lower or "pydantic" in q_lower:
+            extra_terms.extend(["Pydantic", "field_validator", "BaseModel"])
+        if "rest" in q_lower or "http" in q_lower:
+            extra_terms.extend(["idempotency", "status_codes", "API"])
+
+        combined = " ".join(filtered + extra_terms)
+        new_query = combined if combined.strip() else f"{question} documentation reference"
 
     print(f"[Query Rewriter Node] Rewritten query: '{new_query}'")
 

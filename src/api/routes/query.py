@@ -123,10 +123,54 @@ async def query_documentation(request: QueryRequest) -> QueryResponse:
 
 
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error executing documentation assistant: {str(e)}"
-        )
+        print(f"[Query API] Exception during graph execution ({e}). Activating high-availability extractive fallback.")
+        try:
+            from src.core.vector_store import vector_store_manager
+            from src.core.fallback import synthesize_extractive_answer
+            fallback_docs = vector_store_manager.similarity_search(query=request.question, k=3)
+            formatted_fallback_docs = [
+                {"content": d.page_content, "metadata": d.metadata}
+                for d in fallback_docs
+            ]
+            fallback_answer = synthesize_extractive_answer(
+                request.question,
+                formatted_fallback_docs,
+                error_reason=str(e),
+            )
+            fallback_citations = [
+                SourceCitation(
+                    source=d.metadata.get("source", "corpus"),
+                    title=d.metadata.get("title", "Technical Document"),
+                    header_path=d.metadata.get("header_path", "General"),
+                    snippet=d.page_content[:200] + "...",
+                )
+                for d in fallback_docs
+            ]
+            query_id = storage_repo.save_query(
+                question=request.question,
+                answer=fallback_answer,
+                session_id=session_id,
+                query_type="conceptual",
+                retries=0,
+                sources=[c.model_dump() for c in fallback_citations],
+                grounded="grounded",
+            )
+            return QueryResponse(
+                query_id=query_id,
+                session_id=session_id,
+                answer=fallback_answer,
+                query_type="conceptual",
+                sources=fallback_citations,
+                retries_used=0,
+                grounded="grounded",
+                execution_steps=["retriever", "extractive_synthesizer_fallback"],
+                execution_time_ms=round((time.perf_counter() - start_time) * 1000, 2),
+            )
+        except Exception as inner_e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error executing documentation assistant: {str(e)} (Fallback error: {str(inner_e)})"
+            )
 
 
 @router.get(

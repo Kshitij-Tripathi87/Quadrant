@@ -238,10 +238,18 @@ async function handleSend() {
     loadRecentSessions();
   } catch (err) {
     removeMessage(loadingId);
-    appendErrorMessage(err.message);
+    appendErrorMessage(err.message, query);
   } finally {
     sendBtn.disabled = false;
     input.focus();
+  }
+}
+
+function retryQuery(queryText) {
+  const input = document.getElementById("user-input");
+  if (input) {
+    input.value = queryText;
+    handleSend();
   }
 }
 
@@ -276,7 +284,7 @@ function appendLoadingIndicator() {
         </span>
         <div style="display: flex; flex-direction: column; gap: 0.15rem;">
           <span style="font-weight: 600; color: #f1f5f9; font-size: 0.9rem;">Executing LangGraph State Machine...</span>
-          <span style="font-size: 0.75rem; color: var(--text-dim);">Query Analysis ➔ ChromaDB Retrieval ➔ Document Grader ➔ Gemini Generator</span>
+          <span style="font-size: 0.75rem; color: var(--text-dim);">Query Analysis ➔ ChromaDB Retrieval ➔ Document Grader ➔ Failover-Protected Generator</span>
         </div>
       </div>
     </div>
@@ -291,16 +299,24 @@ function removeMessage(id) {
   if (el) el.remove();
 }
 
-function appendErrorMessage(errText) {
+function appendErrorMessage(errText, failedQuery = "") {
   const container = document.getElementById("chat-messages");
   const div = document.createElement("div");
   div.className = "message-row";
+  const escapedQuery = failedQuery ? escapeHtml(failedQuery).replace(/'/g, "\\'") : "";
+  const retryBtn = failedQuery ? `
+    <button class="secondary-btn" style="margin-top: 0.75rem; font-size: 0.78rem; padding: 0.35rem 0.85rem; border-color: rgba(244, 63, 94, 0.4); color: #fda4af;" onclick="retryQuery('${escapedQuery}')">
+      🔄 Retry Query
+    </button>
+  ` : "";
+
   div.innerHTML = `
     <div class="message-avatar bot-avatar" style="background: var(--accent-rose);">⚠️</div>
     <div class="message-body">
       <div class="bot-bubble" style="border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.08);">
-        <strong style="color: #fda4af;">Execution Error:</strong>
+        <strong style="color: #fda4af;">Execution Notice:</strong>
         <p style="margin-top: 0.35rem; font-size: 0.88rem; color: #fecdd3;">${escapeHtml(errText)}</p>
+        ${retryBtn}
       </div>
     </div>
   `;
@@ -338,10 +354,14 @@ function appendAssistantMessage(data, scroll = true) {
     ? `<span class="meta-pill retries">🔄 ${data.retries_used} rewrite${data.retries_used > 1 ? 's' : ''}</span>`
     : "";
 
-  const isGrounded = data.grounded === "grounded";
-  const groundedHtml = isGrounded
-    ? `<span class="meta-pill grounded">✓ Self-RAG Grounded</span>`
-    : `<span class="meta-pill disclaimer">⚠ External Knowledge</span>`;
+  let groundedHtml = "";
+  if (data.grounded === "extractive_offline_fallback" || (data.execution_steps && data.execution_steps.includes("extractive_synthesizer_fallback"))) {
+    groundedHtml = `<span class="meta-pill" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35);">🛡️ Rate-Limit Failover Activated</span>`;
+  } else if (data.grounded === "grounded") {
+    groundedHtml = `<span class="meta-pill grounded">✓ Self-RAG Grounded</span>`;
+  } else {
+    groundedHtml = `<span class="meta-pill disclaimer">⚠ External Knowledge</span>`;
+  }
 
   // Citations Accordion
   let citationsHtml = "";
