@@ -9,7 +9,7 @@ from src.config import settings
 from src.storage.database import init_db
 from src.core.vector_store import vector_store_manager
 from src.ingestion.indexer import seed_default_corpus
-from src.api.routes import query, ingest, documents, feedback, health
+from src.api.routes import query, ingest, documents, feedback, health, download
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -50,13 +50,15 @@ app.include_router(ingest.router, prefix="/api/v1")
 app.include_router(documents.router, prefix="/api/v1")
 app.include_router(feedback.router, prefix="/api/v1")
 app.include_router(health.router, prefix="/api/v1")
+app.include_router(download.router, prefix="/api/v1")
 
-# Also include API Routers at root level (as specified in assignment PRD: /query, /ingest, /documents, /feedback, /health)
+# Also include API Routers at root level (as specified in assignment PRD: /query, /ingest, /documents, /feedback, /health, /download)
 app.include_router(query.router)
 app.include_router(ingest.router)
 app.include_router(documents.router)
 app.include_router(feedback.router)
 app.include_router(health.router)
+app.include_router(download.router)
 
 # Mount Static UI directory
 static_dir = Path(__file__).resolve().parent / "static"

@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download DocuGraph AI | Self-Corrective Technical Documentation Assistant</title>
+  <meta name="description" content="Download DocuGraph AI desktop application for Windows (.exe and .msi). Enterprise-grade Self-Corrective RAG Technical Documentation Assistant.">
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+  <style>
+    /* Dedicated Download Portal Styling Extensions */
+    .download-hero {
+      position: relative;
+      padding: 72px 24px 48px;
+      text-align: center;
+      max-width: 1040px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .hero-glow-blob {
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(56, 189, 248, 0.08) 50%, transparent 70%);
+      filter: blur(60px);
+      z-index: -1;
+      pointer-events: none;
+    }
+    .download-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #818cf8;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      margin-bottom: 24px;
+    }
+    .download-badge .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 10px #38bdf8;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+    .hero-title {
+      font-size: 2.75rem;
+      font-weight: 800;
+      line-height: 1.18;
+      margin-bottom: 18px;
+      color: #f8fafc;
+      letter-spacing: -0.02em;
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #818cf8 0%, #38bdf8 50%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: #94a3b8;
+      max-width: 680px;
+      margin: 0 auto 36px;
+      line-height: 1.6;
+    }
+    .quick-cta-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+    .btn-download-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 1.05rem;
+      border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+    .btn-download-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 32px -4px rgba(99, 102, 241, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+      background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    }
+    .btn-download-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      font-weight: 600;
+      font-size: 0.975rem;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+    }
+    .btn-download-secondary:hover {
+      background: rgba(51, 65, 85, 0.95);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+    .btn-try-online {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 24px;
+      background: transparent;
+      border: 1px dashed rgba(148, 163, 184, 0.35);
+      color: #38bdf8;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn-try-online:hover {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.08);
+      color: #7dd3fc;
+    }
+    .trust-bullets {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      color: #64748b;
+      font-size: 0.8125rem;
+    }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .trust-item svg {
+      color: #10b981;
+    }
+
+    /* Cards Grid */
+    .packages-container {
+      max-width: 1140px;
+      margin: 0 auto 64px;
+      padding: 0 24px;
+    }
+    .section-header-centered {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .section-eyebrow {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #818cf8;
+      margin-bottom: 8px;
+    }
+    .section-heading {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+    .pkg-card {
+      background: rgba(17, 24, 39, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(16px);
+    }
+    .pkg-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 25px -5px rgba(99, 102, 241, 0.2);
+    }
+    .pkg-card.featured {
+      border: 1.5px solid rgba(99, 102, 241, 0.6);
+      background: linear-gradient(180deg, rgba(30, 27, 75, 0.6) 0%, rgba(17, 24, 39, 0.85) 100%);
+    }
+    .featured-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%);
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 9999px;
+      letter-spacing: 0.04em;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+    .pkg-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #818cf8;
+    }
+    .pkg-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 6px;
+    }
+    .pkg-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.8125rem;
+      color: #64748b;
+      margin-bottom: 18px;
+    }
+    .pkg-pill {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+    .pkg-description {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin-bottom: 24px;
+      flex-grow: 1;
+    }
+    .pkg-feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 28px 0;
+    }
+    .pkg-feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .pkg-feature-list svg {
+      color: #38bdf8;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .card-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .card-btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+    }
+    .card-btn-primary:hover {
+      background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+      transform: translateY(-1px);
+    }
+    .card-btn-outline {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+    }
+    .card-btn-outline:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+    .sha-verify-btn {
+      background: none;
+      border: none;
+      color: #64748b;
+      font-size: 0.775rem;
+      font-family: 'JetBrains Mono', monospace;
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .sha-verify-btn:hover {
+      color: #94a3b8;
+    }
+
+    /* Steps Section */
+    .steps-section {
+      max-width: 1040px;
+      margin: 0 auto 72px;
+      padding: 0 24px;
+    }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 32px;
+    }
+    .step-card {
+      background: rgba(17, 24, 39, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 24px;
+      position: relative;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(99, 102, 241, 0.2);
+      color: #818cf8;
+      font-weight: 700;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .step-title {
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+    .step-desc {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      line-height: 1.45;
+    }
+
+    /* Specs & Checksum Table */
+    .specs-section {
+      max-width: 1040px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+    .specs-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+      background: rgba(17, 24, 39, 0.65);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .specs-table th, .specs-table td {
+      padding: 14px 20px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.875rem;
+    }
+    .specs-table th {
+      background: rgba(30, 41, 59, 0.5);
+      color: #94a3b8;
+      font-weight: 600;
+    }
+    .specs-table td {
+      color: #cbd5e1;
+    }
+    .specs-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Toast Notification */
+    .download-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e1b4b;
+      border: 1px solid #6366f1;
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: #ffffff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      transform: translateY(120px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .download-toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .download-toast-icon {
+      color: #38bdf8;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.1rem;
+      }
+      .quick-cta-row {
+        flex-direction: column;
+        width: 100%;
+      }
+      .btn-download-primary, .btn-download-secondary, .btn-try-online {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <a href="/" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit;">
+          <div class="brand-logo" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <div class="brand-title-row">
+              <span class="brand-name">DocuGraph <span class="gradient-text">AI</span></span>
+              <span class="version-tag">v2.0</span>
+            </div>
+            <span class="brand-subtitle">Download & Installation Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="nav-tabs" role="tablist">
+        <a href="/" class="tab-btn" style="text-decoration: none;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>Live Web App</span>
+        </a>
+        <a href="#packages" class="tab-btn active" style="text-decoration: none;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          <span>Download Installers</span>
+        </a>
+        <a href="/docs" target="_blank" class="tab-btn" style="text-decoration: none;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span>API Docs (Swagger)</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="download-hero">
+    <div class="hero-glow-blob"></div>
+
+    <div class="download-badge">
+      <span class="pulse-dot"></span>
+      <span>Official Release 2.0 • Windows 10 & 11 Ready</span>
+    </div>
+
+    <h1 class="hero-title">
+      Download <span class="gradient-text">DocuGraph AI</span><br>For Windows Desktop
+    </h1>
+
+    <p class="hero-subtitle">
+      Install the self-corrective LangGraph technical documentation assistant as a standalone desktop app.
+      One click opens your interactive assistant with local ChromaDB vector storage and zero external dependencies.
+    </p>
+
+    <!-- Quick CTA Action Row -->
+    <div class="quick-cta-row">
+      <a href="/download/exe" class="btn-download-primary" onclick="notifyDownload('Windows Setup Wizard (.exe)')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>Download for Windows (.exe)</span>
+        <span style="opacity: 0.75; font-size: 0.85rem; font-weight: 500;">~124 MB</span>
+      </a>
+
+      <a href="/download/msi" class="btn-download-secondary" onclick="notifyDownload('Windows Installer (.msi)')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="12" y1="8" x2="12" y2="16"></line>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+        <span>Download .MSI Package</span>
+      </a>
+
+      <a href="/" class="btn-try-online">
+        <span>Try Web App Online</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"></path>
+          <path d="m12 5 7 7-7 7"></path>
+        </svg>
+      </a>
+    </div>
+
+    <div class="trust-bullets">
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span>Desktop Shortcut with Custom Icon</span>
+      </div>
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span>Verified SHA-256 Checksums</span>
+      </div>
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span>100% Free & Open Source</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download Packages Section -->
+  <section class="packages-container" id="packages">
+    <div class="section-header-centered">
+      <div class="section-eyebrow">Choose Your Distribution Format</div>
+      <h2 class="section-heading">Installation Options for Every Workflow</h2>
+    </div>
+
+    <div class="cards-grid">
+      <!-- Card 1: Setup Wizard (.exe) -->
+      <div class="pkg-card featured">
+        <div class="featured-badge">RECOMMENDED</div>
+        <div class="pkg-icon-wrap">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <h3 class="pkg-name">Windows Setup Wizard (.exe)</h3>
+        <div class="pkg-meta">
+          <span class="pkg-pill">v2.0.0</span>
+          <span class="pkg-pill">124 MB</span>
+          <span>Single-File Wizard</span>
+        </div>
+        <p class="pkg-description">
+          Best for standard users and developers. A graphical installer with an installation progress bar that extracts the application and automatically creates desktop & Start Menu shortcuts.
+        </p>
+        <ul class="pkg-feature-list">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Creates <strong>"DocuGraph AI"</strong> desktop icon</span>
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Installs into user profile (Zero Admin Rights needed)</span>
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Includes 1-click clean Uninstaller</span>
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Supports silent deployment: <code>/S</code> flag</span>
+          </li>
+        </ul>
+        <div class="card-actions">
+          <a href="/download/exe" class="card-btn card-btn-primary" onclick="notifyDownload('DocuGraphAI_Setup.exe')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Download Setup (.exe)</span>
+          </a>
+          <button class="sha-verify-btn" onclick="copySHA('37E6F6ECB663F0D390A268FA8A97CB190FAFEB8A853754710D2E584B3F14CC61')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span>Copy SHA-256 Checksum</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Card 2: Windows Installer (.msi) -->
+      <div class="pkg-card">
+        <div class="pkg-icon-wrap" style="color: #38bdf8; background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.3);">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
+          </svg>
+        </div>
+        <h3 class="pkg-name">Windows Installer (.msi)</h3>
+        <div class="pkg-meta">
+          <span class="pkg-pill">v2.0.0</span>
+          <span class="pkg-pill">124 MB</span>
+          <span>Enterprise MSI</span>
+        </div>
+        <p class="pkg-description">
+          Ideal for enterprise IT environments, system administrators, and automated software distribution pipelines via Microsoft Windows Installer (msiexec).
+        </p>
+        <ul class="pkg-feature-list">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Standard Windows Installer database</span>
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Works with <code>msiexec /i DocuGraphAI_Setup.msi /quiet</code></span>
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Registered in Windows Programs & Features</span>
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>GPO & SCCM fleet deployment ready</span>
+          </li>
+        </ul>
+        <div class="card-actions">
+          <a href="/download/msi" class="card-btn card-btn-outline" onclick="notifyDownload('DocuGraphAI_Setup.msi')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Download Package (.msi)</span>
+          </a>
+          <button class="sha-verify-btn" onclick="copySHA('D75991E3A085D86E33DE274C7786C627AE0349669AD1D4D508422636BDD3879F')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span>Copy SHA-256 Checksum</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Card 3: Portable Archive (.zip) -->
+      <div class="pkg-card">
+        <div class="pkg-icon-wrap" style="color: #c084fc; background: rgba(192, 132, 252, 0.15); border-color: rgba(192, 132, 252, 0.3);">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="21 8 21 21 3 21 3 8"></polyline>
+            <rect x="1" y="3" width="22" height="5"></rect>
+            <line x1="10" y1="12" x2="14" y2="12"></line>
+          </svg>
+        </div>
+        <h3 class="pkg-name">Portable Archive (.zip)</h3>
+        <div class="pkg-meta">
+          <span class="pkg-pill">v2.0.0</span>
+          <span class="pkg-pill">114 MB</span>
+          <span>Zero-Install Portable</span>
+        </div>
+        <p class="pkg-description">
+          Want to run immediately without running an installer? Simply extract the archive anywhere (even on a USB stick) and double-click <code>DocuGraphAI.exe</code>.
+        </p>
+        <ul class="pkg-feature-list">
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>No administrative permissions required</span>
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Completely self-contained runtime</span>
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Includes 1-click <code>Install_DocuGraphAI.bat</code></span>
+          </li>
+          <li>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Preserves local database and index</span>
+          </li>
+        </ul>
+        <div class="card-actions">
+          <a href="/download/zip" class="card-btn card-btn-outline" onclick="notifyDownload('DocuGraphAI_bundle.zip')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Download ZIP Archive</span>
+          </a>
+          <button class="sha-verify-btn" onclick="copySHA('D2061EC54AE995FF7C1BEC7135C9470D2C8D911525DD51D2681BA8BB69610126')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span>Copy SHA-256 Checksum</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4-Step Visual Walkthrough -->
+  <section class="steps-section">
+    <div class="section-header-centered">
+      <div class="section-eyebrow">Quick Setup Guide</div>
+      <h2 class="section-heading">How Installation Works</h2>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h4 class="step-title">Download Package</h4>
+        <p class="step-desc">Choose between the <strong>.exe</strong> setup wizard or enterprise <strong>.msi</strong> package above.</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h4 class="step-title">Run Setup</h4>
+        <p class="step-desc">Double click the installer. The wizard automatically extracts all binaries and configures local storage.</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h4 class="step-title">Click Desktop Icon</h4>
+        <p class="step-desc">The installer creates a <strong>"DocuGraph AI"</strong> desktop icon with our branded icon. Click it to launch!</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">4</div>
+        <h4 class="step-title">Self-Corrective RAG</h4>
+        <p class="step-desc">Ask questions, inspect retrieved chunks, and ingest new documents with automated hallucination checks.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- System Requirements & Specifications -->
+  <section class="specs-section">
+    <div class="section-header-centered">
+      <div class="section-eyebrow">Technical Specifications</div>
+      <h2 class="section-heading">System Requirements & File Verification</h2>
+    </div>
+
+    <table class="specs-table">
+      <thead>
+        <tr>
+          <th>Requirement / Property</th>
+          <th>Specification Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Operating System</strong></td>
+          <td>Windows 10 (64-bit) / Windows 11 (64-bit)</td>
+        </tr>
+        <tr>
+          <td><strong>Architecture</strong></td>
+          <td>x86_64 / AMD64</td>
+        </tr>
+        <tr>
+          <td><strong>Hardware Requirements</strong></td>
+          <td>Minimum 4 GB RAM, 500 MB free disk space, Intel/AMD Dual-Core 2.0GHz+</td>
+        </tr>
+        <tr>
+          <td><strong>Embedded Engine</strong></td>
+          <td>FastAPI 0.111+ • LangGraph StateGraph • ChromaDB • FastEmbed (all-MiniLM-L6-v2)</td>
+        </tr>
+        <tr>
+          <td><strong>UI Runtime</strong></td>
+          <td>Microsoft Edge WebView2 (pre-installed on Windows 10/11) with fallback to default browser</td>
+        </tr>
+        <tr>
+          <td><strong>Setup Executable (.exe) SHA-256</strong></td>
+          <td><code style="font-size: 0.775rem; color: #818cf8;">37E6F6ECB663F0D390A268FA8A97CB190FAFEB8A853754710D2E584B3F14CC61</code></td>
+        </tr>
+        <tr>
+          <td><strong>Installer Package (.msi) SHA-256</strong></td>
+          <td><code style="font-size: 0.775rem; color: #38bdf8;">D75991E3A085D86E33DE274C7786C627AE0349669AD1D4D508422636BDD3879F</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Floating Toast Notification on Download -->
+  <div id="download-toast" class="download-toast">
+    <div class="download-toast-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+    </div>
+    <div>
+      <div id="toast-title" style="font-weight: 700; font-size: 0.95rem;">Downloading package...</div>
+      <div id="toast-sub" style="font-size: 0.8rem; color: #cbd5e1;">Your download will begin shortly. Run the installer to begin!</div>
+    </div>
+  </div>
+
+  <footer style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 36px 24px; text-align: center; color: #64748b; font-size: 0.85rem;">
+    <div style="max-width: 1040px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <strong>DocuGraph AI</strong> — Built with LangGraph & FastAPI for Express Analytics.
+      </div>
+      <div style="display: flex; gap: 20px;">
+        <a href="/" style="color: #94a3b8; text-decoration: none;">Live Web App</a>
+        <a href="/docs" style="color: #94a3b8; text-decoration: none;">API Documentation</a>
+        <a href="/download" style="color: #94a3b8; text-decoration: none;">Download Portal</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function notifyDownload(pkgName) {
+      const toast = document.getElementById('download-toast');
+      document.getElementById('toast-title').textContent = 'Downloading ' + pkgName;
+      document.getElementById('toast-sub').textContent = 'After download finishes, double-click to install and start!';
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 5000);
+    }
+
+    function copySHA(sha) {
+      navigator.clipboard.writeText(sha).then(() => {
+        const toast = document.getElementById('download-toast');
+        document.getElementById('toast-title').textContent = 'SHA-256 Copied to Clipboard';
+        document.getElementById('toast-sub').textContent = sha.substring(0, 32) + '...';
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 4000);
+      });
+    }
+  </script>
+</body>
+</html>

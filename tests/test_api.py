@@ -119,5 +119,66 @@ def test_query_endpoint_execution(monkeypatch):
     assert "query_id" in data_root
     assert "FastAPI dependency injection" in data_root["answer"]
 
+def test_download_landing_page():
+    # Test GET /download serves HTML portal
+    response = client.get("/download")
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    assert "Download DocuGraph AI" in response.text
+    assert "DocuGraphAI_Setup.exe" in response.text
+
+    # Test GET /api/v1/download also serves portal
+    res_v1 = client.get("/api/v1/download")
+    assert res_v1.status_code == 200
+
+def test_download_info_metadata():
+    # Test GET /api/v1/download/info metadata
+    response = client.get("/api/v1/download/info")
+    assert response.status_code == 200
+    data = response.json()
+    assert "version" in data
+    assert "packages" in data
+
+    # Verify windows exe metadata
+    exe_info = data["packages"]["exe"]
+    assert exe_info["available"] is True
+    assert exe_info["size_mb"] > 0
+    assert len(exe_info["sha256"]) == 64
+
+    # Verify windows msi metadata
+    msi_info = data["packages"]["msi"]
+    assert msi_info["available"] is True
+    assert msi_info["size_mb"] > 0
+    assert len(msi_info["sha256"]) == 64
+
+    # Verify windows zip metadata
+    zip_info = data["packages"]["zip"]
+    assert zip_info["available"] is True
+    assert zip_info["size_mb"] > 0
+    assert len(zip_info["sha256"]) == 64
+
+def test_download_binary_headers():
+    # Test HEAD/GET for executable download
+    response = client.get("/download/exe")
+    assert response.status_code == 200
+    assert 'attachment; filename="DocuGraphAI_Setup.exe"' in response.headers["content-disposition"]
+    assert int(response.headers["content-length"]) > 100_000_000
+
+    # Test GET for MSI download
+    res_msi = client.get("/download/msi")
+    assert res_msi.status_code == 200
+    assert 'attachment; filename="DocuGraphAI_Setup.msi"' in res_msi.headers["content-disposition"]
+    assert int(res_msi.headers["content-length"]) > 100_000_000
+
+    # Test GET for ZIP download
+    res_zip = client.get("/download/zip")
+    assert res_zip.status_code == 200
+    assert 'attachment; filename="DocuGraphAI_bundle.zip"' in res_zip.headers["content-disposition"]
+
+    # Test GET for install script
+    res_bat = client.get("/download/script")
+    assert res_bat.status_code == 200
+    assert 'attachment; filename="Install_DocuGraphAI.bat"' in res_bat.headers["content-disposition"]
+
 
 

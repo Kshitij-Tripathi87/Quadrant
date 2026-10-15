@@ -260,6 +260,39 @@ body {
   border-color: var(--border-hover);
 }
 
+.download-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-sm);
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.download-header-btn svg {
+  color: #818cf8;
+  transition: transform 0.2s ease;
+}
+
+.download-header-btn:hover {
+  background: #4f46e5;
+  color: #ffffff;
+  border-color: #6366f1;
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.45);
+  transform: translateY(-1px);
+}
+
+.download-header-btn:hover svg {
+  color: #ffffff;
+  transform: translateY(1px);
+}
+
 /* ==========================================================================
    Main Container
    ========================================================================== */

@@ -73,11 +73,33 @@ def document_grader_node(state: GraphState) -> dict:
             "chunks_formatted": chunks_formatted
         })
 
-        relevant_indices = {
-            item.chunk_index for item in res.evaluations if item.is_relevant
-        }
+        raw_indices = [item.chunk_index for item in res.evaluations]
+        is_1_based = (
+            bool(raw_indices)
+            and min(raw_indices) >= 1
+            and max(raw_indices) >= len(documents)
+        )
 
-        # If LLM deemed at least one relevant, filter by it
+        relevant_indices = set()
+        for item in res.evaluations:
+            if item.is_relevant:
+                idx = item.chunk_index - 1 if is_1_based else item.chunk_index
+                if 0 <= idx < len(documents):
+                    relevant_indices.add(idx)
+
+        # Resilient technical keyword preservation heuristic
+        import re
+        q_tokens = set(re.findall(r"@?[a-zA-Z_][a-zA-Z0-9_]{3,}", question.lower()))
+        common_words = {"what", "when", "where", "which", "while", "with", "about", "using", "from", "have", "this", "that", "does", "explain", "implement"}
+        key_tokens = [t for t in q_tokens if t not in common_words and len(t) >= 4]
+
+        for idx, doc in enumerate(documents):
+            content_lower = doc.get("content", "").lower()
+            header_lower = doc.get("metadata", {}).get("header_path", "").lower()
+            if any(tok in content_lower or tok in header_lower for tok in key_tokens if tok.startswith("@") or "_" in tok or len(tok) >= 6):
+                relevant_indices.add(idx)
+
+        # If relevant indices found, retain them
         if relevant_indices:
             for idx, doc in enumerate(documents):
                 score = "relevant" if idx in relevant_indices else "irrelevant"
