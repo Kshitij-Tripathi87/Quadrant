@@ -14,12 +14,16 @@ GUIDELINES:
 1. Strict Grounding: Rely ONLY on the provided context. Do NOT fabricate functions, parameters, or explanations not supported by the context.
 2. Code Clarity: When providing code snippets, include clean, idiomatic Python code with clear comments.
 3. Citations & References: Cite your sources inline or at the end of sections using the format: `[Source: <Document Title> > <Section>]`.
-4. Tone & Style: Be direct, professional, and practical. Avoid fluff.
-5. Insufficient Context: If the context does not contain enough information to answer the question with certainty, clearly state: "The indexed documentation does not contain sufficient details to answer this question." Do not guess."""
+4. Conversation Continuity: When previous conversation turns are provided, use them to understand follow-up questions or contextual references.
+5. Tone & Style: Be direct, professional, and practical. Avoid fluff.
+6. Insufficient Context: If the context does not contain enough information to answer the question with certainty, clearly state: "The indexed documentation does not contain sufficient details to answer this question." Do not guess."""
     ),
     (
         "human",
-        """User Question:
+        """Recent Conversation History:
+{chat_history}
+
+User Question:
 {question}
 
 Query Intent:
@@ -38,6 +42,7 @@ def generator_node(state: GraphState) -> dict:
     """
     question = state.get("question", "")
     query_type = state.get("query_type", "conceptual")
+    chat_history = state.get("chat_history", [])
     relevant_docs = state.get("relevant_documents", [])
     steps = state.get("execution_steps", []).copy()
     steps.append("generator")
@@ -79,12 +84,21 @@ def generator_node(state: GraphState) -> dict:
 
     full_context = "\n".join(context_parts)
 
+    # Format chat history for prompt
+    history_lines = []
+    for turn in chat_history[-4:]:
+        role = "User" if turn.get("role") == "user" else "Assistant"
+        content_snippet = turn.get("content", "")[:250]
+        history_lines.append(f"{role}: {content_snippet}")
+    history_formatted = "\n".join(history_lines) if history_lines else "None (New Conversation)"
+
     try:
         llm = get_llm(temperature=0.1)
         chain = GENERATION_PROMPT | llm | StrOutputParser()
         answer = chain.invoke({
             "question": question,
             "query_type": query_type,
+            "chat_history": history_formatted,
             "context": full_context,
         })
     except Exception as e:

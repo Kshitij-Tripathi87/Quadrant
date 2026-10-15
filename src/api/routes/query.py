@@ -64,9 +64,21 @@ async def query_documentation(request: QueryRequest) -> QueryResponse:
         )
 
     try:
+        # Load previous conversation history for multi-turn session memory
+        past_turns = storage_repo.get_session_queries(session_id, limit=6)
+        formatted_history = []
+        for turn in past_turns:
+            q_text = turn.get("question")
+            a_text = turn.get("answer")
+            if q_text:
+                formatted_history.append({"role": "user", "content": q_text})
+            if a_text:
+                formatted_history.append({"role": "assistant", "content": a_text})
+
         initial_state = {
             "question": request.question,
             "current_query": request.question,
+            "chat_history": formatted_history,
             "retry_count": 0,
             "execution_steps": [],
         }
