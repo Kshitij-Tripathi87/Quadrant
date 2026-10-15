@@ -787,6 +787,48 @@ function showToast(message, type = "info", duration = 3000) {
 /* ==========================================================================
    Empty State Template
    ========================================================================== */
+/* ==========================================================================
+   Application Download Modal & Session Export Controls
+   ========================================================================== */
+function openDownloadModal() {
+  const modal = document.getElementById("download-modal");
+  if (modal) modal.style.display = "flex";
+}
+
+function closeDownloadModal() {
+  const modal = document.getElementById("download-modal");
+  if (modal) modal.style.display = "none";
+}
+
+function notifyDownload(pkgName) {
+  showToast(`Starting download: ${pkgName}... Run the installer to begin!`, "success");
+  setTimeout(() => {
+    closeDownloadModal();
+  }, 1000);
+}
+
+function exportCurrentSession() {
+  if (!currentSessionId) return;
+  showToast("Exporting conversation session transcript...", "info");
+  window.location.href = `/api/v1/query/export/${encodeURIComponent(currentSessionId)}?format=markdown`;
+}
+
+async function clearCurrentSession() {
+  if (!confirm("Are you sure you want to clear this conversation history?")) return;
+  try {
+    const res = await fetch(`/api/v1/query/history/${encodeURIComponent(currentSessionId)}`, {
+      method: "DELETE"
+    });
+    if (!res.ok) throw new Error("Could not clear session history");
+    const container = document.getElementById("chat-messages");
+    if (container) container.innerHTML = getEmptyStateHtml();
+    showToast("Conversation cleared", "info");
+    loadRecentSessions();
+  } catch (err) {
+    showToast("Failed to clear conversation: " + err.message, "error");
+  }
+}
+
 function getEmptyStateHtml() {
   return `
     <div class="empty-state" id="empty-state">
@@ -799,7 +841,6 @@ function getEmptyStateHtml() {
           </svg>
         </div>
       </div>
-
 
       <h1 class="hero-title">Technical Documentation Assistant</h1>
       <p class="hero-desc">
@@ -819,6 +860,26 @@ function getEmptyStateHtml() {
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           Granular Markdown Citations
         </span>
+      </div>
+
+      <!-- Desktop App 1-Click Download Callout -->
+      <div class="desktop-banner-card">
+        <div class="banner-left">
+          <div class="banner-icon">💻</div>
+          <div>
+            <div class="banner-title">Run DocuGraph AI as a Native Windows App</div>
+            <div class="banner-sub">Standalone desktop app with offline WebView2, embedded ChromaDB, and FastEmbed.</div>
+          </div>
+        </div>
+        <div class="banner-actions">
+          <a href="/download/exe" class="banner-download-btn" onclick="notifyDownload('Windows Setup (.exe)')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download .exe
+          </a>
+          <button class="banner-outline-btn" onclick="openDownloadModal()">
+            All Packages
+          </button>
+        </div>
       </div>
 
       <div class="suggestions-container">

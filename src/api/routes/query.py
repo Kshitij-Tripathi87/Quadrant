@@ -220,3 +220,60 @@ async def clear_session_history(session_id: str):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to clear session: {str(e)}"
         )
+
+
+@router.get(
+    "/export/{session_id}",
+    summary="Export conversation session as Markdown or JSON",
+    description="Generates an export of the conversation session including sources and telemetry."
+)
+async def export_session(
+    session_id: str,
+    format: str = Query("markdown", description="Format to export ('markdown' or 'json')")
+):
+    history = storage_repo.get_session_history(session_id, limit=100)
+    if not history:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No conversation history found for session ID: {session_id}"
+        )
+
+    if format.lower() == "json":
+        return {
+            "session_id": session_id,
+            "export_time": time.strftime("%Y-%m-%d %H:%M:%SZ", time.gmtime()),
+            "messages": history,
+        }
+
+    # Markdown format export
+    lines = [
+        f"# DocuGraph AI Conversation Export",
+        f"- **Session ID:** `{session_id}`",
+        f"- **Exported At:** {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}",
+        f"- **Total Turns:** {len(history)}",
+        f"\n---\n"
+    ]
+    for idx, item in enumerate(history, 1):
+        q = item.get("question", "")
+        a = item.get("answer", "")
+        grounded = item.get("grounded", "grounded")
+        retries = item.get("retries", 0)
+        lines.append(f"### Q{idx}: {q}")
+        lines.append(f"*{grounded.title()} • {retries} query rewrite(s)*\n")
+        lines.append(f"{a}\n")
+        sources = item.get("sources", [])
+        if sources:
+            lines.append("**Sources:**")
+            for s in sources:
+                title = s.get("title", "Doc")
+                sec = s.get("header_path", "")
+                lines.append(f"- *{title}* (`{sec}`)")
+        lines.append("\n---\n")
+
+    md_content = "\n".join(lines)
+    from fastapi.responses import Response
+    return Response(
+        content=md_content,
+        media_type="text/markdown",
+        headers={"Content-Disposition": f'attachment; filename="docugraph_session_{session_id[:8]}.md"'}
+    )

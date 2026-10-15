@@ -181,4 +181,32 @@ def test_download_binary_headers():
     assert 'attachment; filename="Install_DocuGraphAI.bat"' in res_bat.headers["content-disposition"]
 
 
+def test_download_latest():
+    # Test GET /download/latest universal endpoint
+    response = client.get("/download/latest")
+    assert response.status_code == 200
+    assert "attachment; filename=" in response.headers["content-disposition"]
+
+
+def test_export_session():
+    # Create a test session
+    sess_id = "test-export-sess-999"
+    res_q = client.post("/query", json={"question": "How do I use Depends in FastAPI?", "session_id": sess_id})
+    assert res_q.status_code == 200
+
+    # Test markdown export
+    res_md = client.get(f"/api/v1/query/export/{sess_id}?format=markdown")
+    assert res_md.status_code == 200
+    assert "text/markdown" in res_md.headers["content-type"]
+    assert "DocuGraph AI Conversation Export" in res_md.text
+
+    # Test JSON export
+    res_json = client.get(f"/api/v1/query/export/{sess_id}?format=json")
+    assert res_json.status_code == 200
+    data = res_json.json()
+    assert data["session_id"] == sess_id
+    assert len(data["messages"]) > 0
+
+
+
 

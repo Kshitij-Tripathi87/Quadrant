@@ -379,6 +379,23 @@ Retrieves historical query-response pairs, execution trails, and citations for a
 
 ---
 
+### 9. `GET /api/v1/query/export/{session_id}` — Export Conversation Transcript
+Exports the entire chat thread including source citations and evaluation metadata as Markdown (`.md`) or structured JSON.
+
+**Query Parameters:**
+* `format`: `markdown` (default) or `json`
+
+**Response (200 OK):** Streams `attachment; filename="docugraph_session_<id>.md"`.
+
+---
+
+### 10. `GET /download/latest` — Universal Application Download
+Automatically detects and serves the best available installer package (`.exe`, `.msi`, or complete project source archive `.zip`).
+
+**Response (200 OK):** Direct binary file stream with `Accept-Ranges: bytes` support.
+
+---
+
 ## 8. Desktop Application & Windows Installer (.exe / .msi)
 
 DocuGraph AI can be packaged and distributed as a native Windows desktop application. After installation, users simply double-click the desktop shortcut icon to launch the application. The system automatically initializes the embedded FastAPI server, self-corrective LangGraph pipeline, and ChromaDB vector store, presenting the rich web frontend in a dedicated, hardware-accelerated desktop window.

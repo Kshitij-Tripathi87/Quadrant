@@ -169,6 +169,9 @@ class StorageRepository:
             conn.commit()
             return deleted
 
+    # Convenience alias for session queries
+    get_session_history = get_session_queries
+
 # Singleton instance
 storage_repo = StorageRepository()
 

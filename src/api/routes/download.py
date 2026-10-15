@@ -161,6 +161,24 @@ async def download_project_source(request: Request):
 
 
 @router.get(
+    "/download/latest",
+    summary="Download recommended application package",
+    description="Serves the best available installer package or complete project archive.",
+)
+@router.get("/download/app", include_in_schema=False)
+async def download_latest(request: Request):
+    """
+    Universal 1-click download handler:
+    Serves the Windows Setup Wizard (.exe) if available, falling back to MSI or project archive.
+    """
+    if EXE_PATH.exists():
+        return await download_exe(request)
+    if MSI_PATH.exists():
+        return await download_msi(request)
+    return await download_project_source(request)
+
+
+@router.get(
     "/download/exe",
     summary="Download Windows Setup Wizard (.exe)",
     description="Downloads the standalone Windows Setup Wizard executable for DocuGraph AI.",
